@@ -102,12 +102,10 @@ async def registrar_ponto(data: RegistroEmbedding):
         cursor.close()
         conn.close()
 
-        print("DISTANCIA:", menor_distancia)
 
         # 🔥 threshold ajustável
         if menor_distancia < 1.6:
-            print("MATCH:", melhor_match)
-            agora = datetime.now()
+            agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
 
             conn = get_connection()
             cursor = conn.cursor(dictionary=True)
@@ -135,8 +133,9 @@ async def registrar_ponto(data: RegistroEmbedding):
                     )
                 else:
                     ultima = datetime.combine(agora.date(), ultima_hora)
-
-                if agora - ultima < timedelta(minutes=5):
+                print(agora.replace(tzinfo=None))
+                print(ultima)
+                if agora.replace(tzinfo=None) - ultima < timedelta(minutes=5):
                     return {
                         "status": "erro",
                         "msg": "Ponto já registrado",
@@ -148,7 +147,7 @@ async def registrar_ponto(data: RegistroEmbedding):
                 (hor_hora, hor_data, hor_fun_id, hor_semana, hor_status)
                 VALUES (%s, %s, %s, %s, %s)
             """, (
-                agora.time(),
+                agora.strftime("%H:%M"),
                 agora.date(),
                 melhor_match,
                 agora.strftime("%A"),

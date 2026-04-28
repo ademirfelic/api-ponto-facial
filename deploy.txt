@@ -1,0 +1,8 @@
+# 1 - Build nova imagem
+gcloud builds submit --tag southamerica-east1-docker.pkg.dev/myapi-487813/minha-api/minha-api
+
+# 2 - Deploy nova versão
+gcloud run deploy minha-api --image southamerica-east1-docker.pkg.dev/myapi-487813/minha-api/minha-api --region southamerica-east1 --allow-unauthenticated
+
+# 3 - Caso erro no deploy
+gcloud run services logs read minha-api --region southamerica-east1 --limit=100

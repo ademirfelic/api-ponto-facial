@@ -82,14 +82,22 @@ async def registrar_ponto(data: RegistroEmbedding):
         nome = ""
 
         for r in registros:
-            emb = np.array(json.loads(r["rec_embedding"]), dtype=np.float32)
+            try:
+                emb = np.array(json.loads(r["rec_embedding"]), dtype=np.float32)
 
-            distancia = np.linalg.norm(embedding_atual - emb)
+                if emb.shape != embedding_atual.shape:
+                    continue
 
-            if distancia < menor_distancia:
-                menor_distancia = distancia
-                melhor_match = r["rec_funcionario"]
-                nome = r["fun_nome"]
+                distancia = np.linalg.norm(embedding_atual - emb)
+
+                if distancia < menor_distancia:
+                    menor_distancia = distancia
+                    melhor_match = r["rec_funcionario"]
+                    nome = r["fun_nome"]
+
+            except Exception as e:
+                print("Erro registro:", e)
+                continue
 
         cursor.close()
         conn.close()
@@ -97,9 +105,9 @@ async def registrar_ponto(data: RegistroEmbedding):
         print("DISTANCIA:", menor_distancia)
 
         # 🔥 threshold ajustável
-        if menor_distancia < 1.3:
-
-            agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        if menor_distancia < 1.6:
+            print("MATCH:", melhor_match)
+            agora = datetime.now()
 
             conn = get_connection()
             cursor = conn.cursor(dictionary=True)
@@ -164,4 +172,6 @@ async def registrar_ponto(data: RegistroEmbedding):
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
